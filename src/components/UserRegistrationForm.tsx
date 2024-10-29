@@ -49,7 +49,6 @@ export default function UserRegistrationForm({ onSuccess }: UserRegistrationForm
   });
 
   const handleSubmit = form.onSubmit((values) => {
-    // Remove password_confirm before sending to API
     const { password_confirm, ...registrationData } = values;
     mutation.mutate(registrationData);
   });

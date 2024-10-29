@@ -1,4 +1,3 @@
-// src/components/UserDetailsForm.tsx
 import React from 'react';
 import { useForm, zodResolver } from '@mantine/form';
 import { TextInput, Button, Box, Group, Select, PasswordInput } from '@mantine/core';

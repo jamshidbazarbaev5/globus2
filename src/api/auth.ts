@@ -1,6 +1,5 @@
 import axios from 'axios';
 import { UserRegistrationData, UserRegistrationResponse } from './types/auth';
-// types.ts
 interface User {
     id: number;
     first_name: string;
