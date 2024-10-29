@@ -20,6 +20,7 @@ import {
   Modal,
   Radio,
   TextInput,
+  Box,
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconShoppingCart, IconTrash } from "@tabler/icons-react";
@@ -82,6 +83,7 @@ interface VerificationCodeResponse {
     wait: number;
   };
 }
+
 export const Cart: React.FC = () => {
   const { data: cartData, isLoading, error } = useCart();
   const updateCartItem = useUpdateCartItem();
@@ -92,6 +94,11 @@ export const Cart: React.FC = () => {
   const [showCardCreationForm, setShowCardCreationForm] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+
+  const handleProductClick = (productId: number) => {
+    navigate(`/product/${productId}`);
+  };
+
   if (isLoading) return <LoadingOverlay visible={true} />;
   if (error)
     return (
@@ -214,14 +221,31 @@ export const Cart: React.FC = () => {
           <Card key={item.id} padding="lg" radius="md" withBorder>
             <Group justify="space-between">
               <Group>
-                <Image
-                  src={item.product.images[0]?.image}
-                  width={100}
-                  height={100}
-                  alt={item.product.name}
-                />
+                <Box 
+                  style={{ cursor: 'pointer' }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleProductClick(item.product.id);
+                  }}
+                >
+                  <Image
+                    src={item.product.images[0]?.image}
+                    width={100}
+                    height={100}
+                    alt={item.product.name}
+                  />
+                </Box>
                 <Stack gap="xs">
-                  <Text fw={500}>{item.product.name}</Text>
+                  <Text 
+                    fw={500}
+                    style={{ cursor: 'pointer' }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleProductClick(item.product.id);
+                    }}
+                  >
+                    {item.product.name}
+                  </Text>
                   <Text size="sm" c="dimmed">
                     Цена: {item.product.price.toLocaleString()} сум
                   </Text>

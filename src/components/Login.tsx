@@ -1,22 +1,23 @@
-
-
-
 import React, { useState } from 'react';
 import { useForm } from '@mantine/form';
-import { TextInput, PasswordInput, Button, Paper, Title, Text, Notification } from '@mantine/core';
-import { useLogin } from '../api/queries';
+import {
+  TextInput,
+  PasswordInput,
+  Button,
+  Paper,
+  Title,
+  Text,
+  LoadingOverlay,
+  Box,
+} from '@mantine/core';
+import { notifications } from '@mantine/notifications';
 import { useNavigate } from 'react-router-dom';
-import { IconCheck, IconX } from '@tabler/icons-react';
+import { useAuth } from '../context/context';
 
 export const Login: React.FC = () => {
   const navigate = useNavigate();
-  const loginMutation = useLogin();
-  const [notification, setNotification] = useState<{ show: boolean; title: string; message: string; color: 'green' | 'red' }>({
-    show: false,
-    title: '',
-    message: '',
-    color: 'green',
-  });
+  const { login } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm({
     initialValues: {
@@ -24,67 +25,87 @@ export const Login: React.FC = () => {
       password: '',
     },
     validate: {
-      phone: (value) => (/^998\d{9}$/.test(value) ? null : 'Invalid phone number format'),
-      password: (value) => (value.length > 0 ? null : 'Password is required'),
+      phone: (value) => (/^998\d{9}$/.test(value) ? null : 'Неверный формат номера телефона'),
+      password: (value) => (value.length > 0 ? null : 'Требуется пароль'),
     },
   });
 
   const handleSubmit = async (values: { phone: string; password: string }) => {
+    setIsLoading(true);
     try {
-      const response = await loginMutation.mutateAsync(values);
-      localStorage.setItem('token', response.data.token.access);
-      localStorage.setItem('refreshToken', response.data.token.refresh);
-      setNotification({
-        show: true,
-        title: 'Success',
-        message: 'You have successfully logged in',
+      await login(values.phone, values.password);
+      notifications.show({
+        title: 'Успешно',
+        message: 'Вы успешно вошли в систему',
         color: 'green',
       });
       setTimeout(() => navigate('/'), 2000);
     } catch (error: any) {
-      setNotification({
-        show: true,
-        title: 'Error',
-        message: error.response?.data?.errMessage || 'Login failed. Please check your credentials and try again.',
+      notifications.show({
+        title: 'Ошибка',
+        message: error.response?.data?.errMessage || 'Не удалось войти. Пожалуйста, проверьте свои данные и попробуйте снова.',
         color: 'red',
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <Paper radius="md" p="xl" withBorder>
-      <Title order={2} mb="md">Welcome back</Title>
-      <form onSubmit={form.onSubmit(handleSubmit)}>
-        <TextInput
-          required
-          label="Phone"
-          placeholder="998 90 123 45 67"
-          {...form.getInputProps('phone')}
-        />
-        <PasswordInput
-          required
-          label="Password"
-          placeholder="Your password"
-          mt="md"
-          {...form.getInputProps('password')}
-        />
-        <Button fullWidth mt="xl" type="submit" loading={loginMutation.isPending}>
-          Sign in
-        </Button>
-      </form>
-      <Text mt="md" size="sm">
-        Don't have an account? <Text component="a" href="/register" fw={700}>Register</Text>
-      </Text>
-      {notification.show && (
-        <Notification
-          title={notification.title}
-          color={notification.color}
-          onClose={() => setNotification({ ...notification, show: false })}
-          icon={notification.color === 'green' ? <IconCheck size="1.1rem" /> : <IconX size="1.1rem" />}
-        >
-          {notification.message}
-        </Notification>
-      )}
-    </Paper>
+    <Box 
+      style={{
+        display: 'flex',
+        minHeight: '100vh',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '20px'
+      }}
+    >
+      <Paper 
+        radius="md" 
+        p="xl" 
+        withBorder 
+        style={{ 
+          position: 'relative',
+          width: '100%',
+          maxWidth: 400
+        }}
+      >
+        <LoadingOverlay visible={isLoading} />
+        <Title order={2} mb="md">С возвращением</Title>
+        
+        <form onSubmit={form.onSubmit(handleSubmit)}>
+          <TextInput
+            required
+            label="Телефон"
+            placeholder="998 90 123 45 67"
+            {...form.getInputProps('phone')}
+          />
+          <PasswordInput
+            required
+            label="Пароль"
+            placeholder="Ваш пароль"
+            mt="md"
+            {...form.getInputProps('password')}
+          />
+          <Button fullWidth mt="xl" type="submit" loading={isLoading}>
+            Войти
+          </Button>
+        </form>
+
+        <Text mt="md" size="sm">
+          Нет аккаунта?{' '}
+          <Text component="a" href="/register" fw={700}>
+            Зарегистрироваться
+          </Text>
+        </Text>
+        <Text mt="md" size="sm">
+          Хотите вернуться на главную страницу?{' '}
+          <Text component="a" href="/" fw={700}>
+            Назад к продуктам
+          </Text>
+        </Text>
+      </Paper>
+    </Box>
   );
 };

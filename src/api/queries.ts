@@ -10,6 +10,7 @@ import {
   UserResponse
 } from '../models/models';
 import axios from 'axios';
+import { notifications } from '@mantine/notifications';
 
 export const useProducts = (page: number, limit: number, searchTerm?: string, categoryId?: number) => {
   const offset = (page - 1) * limit;
@@ -406,15 +407,23 @@ export const usePayReceipt = () => {
   });
 };
 
-export const useCreateReceipt  = ()=>{
+export const useCreateReceipt = () => {
   return useMutation({
-    mutationFn: async ({ amount, order_id }: { amount: number; order_id: number }) => {
+    mutationFn: async ({ amount, order_id }: { amount: number; order_id:number }) => {
       const response = await api.post('/receipts/receipts_create', { amount, order_id });
       return response.data;
-    
     },
+    onError: (error) => {
+      console.error("Receipt creation failed:", error);
+      notifications.show({
+        title: "Error",
+        message: "Failed to create receipt. Please try again.",
+        color: "red",
+      });
+    }
   });
-}
+};
+
 
 
 export const useVerifyCard = ()=>{

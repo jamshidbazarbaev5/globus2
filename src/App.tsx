@@ -9,16 +9,103 @@ import { CategoryList } from './components/CategoryList';
 import { SearchBar } from './components/SearchBar';
 import { ProductDetail } from './components/ProductDetail';
 import { store } from './redux/store';
-import { AuthProvider } from './context/context';
+import { AuthProvider, useAuth } from './context/context';
 import { Login } from './components/Login';
 import { Register } from './components/RegistrationForm';
-import { ProtectedRoute } from './components/ProtectedRoute';
 import { UserProfile } from './components/UserProfile';
 import { Cart } from './components/Cart';
 import OrderForm from './components/OrderForm';
 import MyOrders from './components/MyOrder';
 
 const queryClient = new QueryClient();
+
+const MainLayout = ({ children }: { children: React.ReactNode }) => (
+  <>
+    <SearchBar />
+    <Grid>
+      <Grid.Col span={{ base: 12, md: 3 }}>
+        <CategoryList />
+      </Grid.Col>
+      <Grid.Col span={{ base: 12, md: 9 }}>
+        {children}
+      </Grid.Col>
+    </Grid>
+  </>
+);
+
+const SimpleLayout = ({ children }: { children: React.ReactNode }) => (
+  <div style={{ 
+    display: 'flex', 
+    minHeight: '100vh',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '20px'
+  }}>
+    {children}
+  </div>
+);
+
+function AppContent() {
+  const { isAuthenticated } = useAuth();
+
+  return (
+    <AppShell>
+      <Container size="xl">
+        <Routes>
+          <Route path="/login" element={
+            <SimpleLayout>
+              <Login />
+            </SimpleLayout>
+          } />
+          <Route path="/register" element={
+            <SimpleLayout>
+              <Register />
+            </SimpleLayout>
+          } />
+
+          <Route path="/" element={
+            <MainLayout>
+              <ProductList />
+            </MainLayout>
+          } />
+          
+          <Route path="/product/:id" element={
+            <MainLayout>
+              <ProductDetail />
+            </MainLayout>
+          } />
+
+          {isAuthenticated ? (
+            <>
+              <Route path="/profile" element={
+                <MainLayout>
+                  <UserProfile />
+                </MainLayout>
+              } />
+              <Route path="/cart" element={
+                <MainLayout>
+                  <Cart />
+                </MainLayout>
+              } />
+              <Route path="/order" element={
+                <MainLayout>
+                  <OrderForm />
+                </MainLayout>
+              } />
+              <Route path="/my-orders" element={
+                <MainLayout>
+                  <MyOrders />
+                </MainLayout>
+              } />
+            </>
+          ) : null}
+
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Container>
+    </AppShell>
+  );
+}
 
 function App() {
   return (
@@ -28,43 +115,7 @@ function App() {
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
             <Router>
-              <AppShell>
-                <Container size="xl">
-                  <SearchBar />
-                  <Grid>
-                    <Grid.Col span={{ base: 12, md: 3 }}>
-                      <CategoryList />
-                    </Grid.Col>
-                    <Grid.Col span={{ base: 12, md: 9 }}>
-                      <Routes>
-                        <Route path="/" element={<ProductList />} />
-                        <Route path="/product/:id" element={<ProductDetail />} />
-                        <Route path="/login" element={<Login />} />
-                        <Route path="/register" element={<Register />} />
-                        <Route
-                          path="/profile"
-                          element={
-                            <ProtectedRoute>
-                              <UserProfile />
-                            </ProtectedRoute>
-                          }
-                        />
-                        <Route
-                          path="/cart"
-                          element={
-                            <ProtectedRoute>
-                              <Cart />
-                            </ProtectedRoute>
-                          }
-                        />
-                        <Route path="/order" element={<OrderForm />} />
-                        <Route path="/my-orders" element={<MyOrders />} />
-                        <Route path="*" element={<Navigate to="/" replace />} />
-                      </Routes>
-                    </Grid.Col>
-                  </Grid>
-                </Container>
-              </AppShell>
+              <AppContent />
             </Router>
           </AuthProvider>
         </QueryClientProvider>

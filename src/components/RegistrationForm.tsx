@@ -16,7 +16,6 @@ import { notifications } from '@mantine/notifications';
 import { useRegister, useVerifyUser, useResendCode } from '../api/queries';
 import { useNavigate } from 'react-router-dom';
 import VerificationModal from './VerificationModal';
-import { log } from 'console';
 
 const registrationSchema = z.object({
   first_name: z.string().min(1, 'First name is required'),
@@ -87,7 +86,6 @@ export const Register: React.FC = () => {
   };
   const handleVerification = async (code: string) => {
     try {
-      // Validate the code format
       if (!code || code.length !== 6 || !/^\d+$/.test(code)) {
         notifications.show({
           title: 'Error',
@@ -97,7 +95,6 @@ export const Register: React.FC = () => {
         return;
       }
   
-      // Make sure we have the phone number
       if (!phone) {
         notifications.show({
           title: 'Error',
@@ -107,7 +104,6 @@ export const Register: React.FC = () => {
         return;
       }
   
-      // Pass both phone and code to the mutation
       const response = await verifyUserMutation.mutateAsync({
         phone: phone.replace(/\s+/g, ''), // Remove any spaces
         code
@@ -138,7 +134,6 @@ export const Register: React.FC = () => {
         autoClose: 5000,
       });
   
-      // If user not found, close modal and redirect to registration
       if (errorMessage.includes('User not found')) {
         setIsModalOpen(false);
         navigate('/register');
@@ -250,6 +245,12 @@ export const Register: React.FC = () => {
         Already have an account?{' '}
         <Text component="a" href="/login" fw={700}>
           Login
+        </Text>
+      </Text>
+      <Text mt="md" size="sm">
+       Want to redirect main page?{' '}
+        <Text component="a" href="/" fw={700}>
+          Back to products
         </Text>
       </Text>
     </Paper>

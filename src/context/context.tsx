@@ -21,17 +21,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logoutMutation = useLogout();
 
   useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      refetch();
+    }
+  }, [refetch]);
+
+  useEffect(() => {
     setIsAuthenticated(!!user);
   }, [user]);
-  // useEffect(() => {
-  //   const token = localStorage.getItem('token');
-  //   if (token) {
-  //     refetch();
-  //   }
-  // }, []);
 
- 
-  
   const login = async (phone: string, password: string) => {
     try {
       const response = await axios.post('https://globus-nukus.uz/api/token', {
@@ -43,6 +42,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.setItem('token', response.data.data.token.access);
         localStorage.setItem('refreshToken', response.data.data.token.refresh);
         await refetch();
+        setIsAuthenticated(true);
         return response.data.data.user;
       } else {
         throw new Error(response.data.errMessage || 'Login failed');

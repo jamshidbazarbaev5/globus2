@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Paper, NavLink, Group, Skeleton, Box, Burger, Drawer } from '@mantine/core';
+import { Paper, NavLink, Stack, Skeleton, Box, Burger, Drawer, ScrollArea } from '@mantine/core';
 import { useCategories } from '../api/queries';
 import { useDispatch, useSelector } from 'react-redux';
 import { setSelectedCategory } from '../redux/categorySlice';
@@ -13,7 +13,6 @@ export const CategoryList: React.FC = () => {
   const dispatch = useDispatch();
   const selectedCategory = useSelector((state: RootState) => state.category.selectedCategory);
   const isMobile = useMediaQuery('(max-width: 768px)');
-  const isDesktop = useMediaQuery('(min-width: 1024px)');
   const [opened, setOpened] = useState(false);
   const navigate = useNavigate();
 
@@ -33,27 +32,23 @@ export const CategoryList: React.FC = () => {
   }
 
   const categoryList = (
-    <Group 
-     
-      style={{
-        flexWrap: 'wrap',
-        flexDirection: 'row',
-      }}
-    >
-      <NavLink 
-        label="All Categories"
-        active={selectedCategory === 0}
-        onClick={() => handleCategoryClick(0)}
-      />
-      {categories?.map((category: ICategory) => (
+    <ScrollArea style={{ height: isMobile ? 'calc(100vh - 60px)' : '1700px' }}>
+      <Stack gap="xs">
         <NavLink 
-          key={category.id}
-          label={category.name}
-          active={selectedCategory === category.id}
-          onClick={() => handleCategoryClick(category.id)}
+          label="All Categories"
+          active={selectedCategory === 0}
+          onClick={() => handleCategoryClick(0)}
         />
-      ))}
-    </Group>
+        {categories?.map((category: ICategory) => (
+          <NavLink 
+            key={category.id}
+            label={category.name}
+            active={selectedCategory === category.id}
+            onClick={() => handleCategoryClick(category.id)}
+          />
+        ))}
+      </Stack>
+    </ScrollArea>
   );
 
   return (
@@ -73,7 +68,7 @@ export const CategoryList: React.FC = () => {
           </Drawer>
         </Box>
       ) : (
-        <Paper p="xs">{categoryList}</Paper>
+        <Paper p="xs" style={{ width: '250px' }}>{categoryList}</Paper>
       )}
     </>
   );

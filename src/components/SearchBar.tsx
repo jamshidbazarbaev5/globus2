@@ -14,7 +14,6 @@ export const SearchBar: React.FC = () => {
   const location = useLocation();
   const { isAuthenticated, logout, user } = useAuth();
 
-
   const debouncedDispatch = useCallback(
     debounce((value: string) => {
       dispatch(setSearchTerm(value));
@@ -46,6 +45,7 @@ export const SearchBar: React.FC = () => {
       navigate('/profile');
     }
   };
+
   const handleMyOrdersClick = () => {
     navigate('/my-orders');
   };
